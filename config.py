@@ -3,9 +3,14 @@ import csv
 import time
 import json
 
+import httplib2
 from loguru import logger
 from selenium import webdriver
+from googleapiclient.discovery import build
 from selenium.webdriver.chrome.webdriver import WebDriver
+from oauth2client.service_account import ServiceAccountCredentials
+
+from creds import scopes
 
 logger.add(
     f'{os.getcwd()}\\log\\logs.log ',
@@ -43,6 +48,12 @@ def timed(func):
     return wrapper
 
 
+def open_json(directory: str, file_name: str) -> dict:
+    with open(os.path.join(os.path.dirname(os.path.realpath(__file__)), directory, file_name), "r",
+              encoding='utf-8') as f:
+        return json.load(f)
+
+
 def open_csv(directory: str, file_name: str) -> list[str, str]:
     with open(os.path.join(os.path.dirname(os.path.realpath(__file__)), directory, file_name), "r") as fp:
         reader = csv.reader(fp, delimiter=",", quotechar='"')
@@ -55,7 +66,7 @@ def save_json(data: dict, directory, file_name) -> None:
         json.dump(data, f, ensure_ascii=False, indent=3)
 
 
-def save_scv_t1(data: list, directory: str, file_name: str) -> None:
+def save_scv_t1(data, directory: str, file_name: str) -> None:
     with open(os.path.join(os.path.dirname(os.path.realpath(__file__)), directory, file_name), 'a',
               newline='') as csv_file:
         writer = csv.writer(csv_file)
@@ -80,3 +91,9 @@ def save_csv_t3(data: dict, directory: str, file_name: str) -> None:
                     value.get('url')
                 )
             )
+
+
+def get_service_sacc(path_to_creds="/creds/serv_acc_igcr.json"):
+    creds_json = os.path.dirname(__file__) + path_to_creds
+    creds_service = ServiceAccountCredentials.from_json_keyfile_name(creds_json, scopes).authorize(httplib2.Http())
+    return build('sheets', 'v4', http=creds_service)

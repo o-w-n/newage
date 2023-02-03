@@ -19,7 +19,7 @@ def create_pagination_list() -> list:
     if page_number.isdigit():
         urls_list.append(BASE_URL)
         for counter in range(2, int(page_number) + 1):
-            urls_list.append(f'https://www.olx.ua/d/uk/nedvizhimost/kvartiry?page={counter}')
+            urls_list.append(f'{BASE_URL}?page={counter}')
     return urls_list
 
 
